@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               String             @id @default(cuid())
+  email            String
+  onboarded        Boolean            @default(false)
+  userUploads      UserUpload[]
+  sites            Site[]
+  fpConnectSession FPConnectSession[]
+}
+
+model UserUpload {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  fileName  String
+  fileId    String
+  fileUrl   String
+  updatedAt DateTime @default(now())
+}
+
+model Site {
+  id         String   @id @default(cuid())
+  siteName   String
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  address    Address  @relation(fields: [addressId], references: [id])
+  addressId  String
+  locationId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Address {
+  id                String   @id @unique
+  latitude          Float
+  longitude         Float
+  formattedAddress  String[]
+  thoroughfare      String
+  buildingName      String
+  subBuildingName   String
+  subBuildingNumber String
+  buildingNumber    String
+  lineOne           String
+  lineTwo           String
+  lineThree         String
+  lineFour          String
+  postcode          String
+  locality          String
+  townOrCity        String
+  county            String
+  district          String
+  country           String
+  residential       Boolean
+  site              Site[]
+}
+
+model FPConnectSession {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  siteName  String
+  fp_cot    String?
+  addressId String
+  fp_status String   @default("new")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([fp_cot])
+}
+
+model InternalKey {
+  id       String   @id @default(cuid())
+  key      String
+  expireAt DateTime
+}
