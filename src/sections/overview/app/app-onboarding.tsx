@@ -76,11 +76,12 @@ export default function AppOnboardingView() {
   };
 
   const newFPConnectSessionMutation = api.user.newFPConnectSession.useMutation();
+    const addAddressMutation = api.common.addAddress.useMutation();
   const [siteName, setSiteName] = React.useState('');
   const [value, setValue] = React.useState<Option | null>(null);
   const [postcode, setPostcode] = React.useState('');
   const [options, setOptions] = React.useState<{id: string, address: string, url: string}[]>([]);
-  const addAddressMutation = api.common.addAddress.useMutation();
+
   const {refetch} = api.common.postcodeAutocomplete.useQuery({ postcode },   {
     enabled: false,
     retry: false,

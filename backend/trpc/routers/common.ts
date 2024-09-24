@@ -19,6 +19,7 @@ export const commonRouter = router({
     }),
 
 
+
     fpCallback: publicProcedure.input(z.object({
         fp_cot: z.string(),
         fp_status: z.string(),
@@ -80,7 +81,29 @@ export const commonRouter = router({
     }),
 
 
-
+    e3CheckMPXN: protectedProcedure.input(z.object({
+        mpxn: z.string(),
+    })).mutation(async (opts) => {
+        const { mpxn } = opts.input;
+        const apiKey = process.env.E3_API_KEY;
+        const response = await fetch(`${process.env.E3_API_BASE_URL}/find-mpxn/${mpxn}`, {
+            headers: {
+                'x-api-key': `${apiKey}`,
+            },
+        });
+        if (response.status === 200) {
+            return { status: 'success' };
+        } else if (response.status === 400) {
+            return { status: 'wrong MPxN number' };
+        } else if (response.status === 404) {
+            return { status: 'no meter found on MPxN' };
+        } else if (response.status === 403) {
+            return { status: 'server error, please contact support'}
+        } 
+        else {
+            throw new Error('Unexpected error occurred');
+        }
+    }),
 
     addAddress: protectedProcedure.input(z.object({
         id: z.string(),

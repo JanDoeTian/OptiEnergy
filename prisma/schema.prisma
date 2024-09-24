@@ -45,6 +45,33 @@ model Site {
   updatedAt  DateTime @updatedAt
 }
 
+enum MeterType {
+  ELECTRICITY
+  GAS
+}
+
+model Meter {
+  id            String         @id @default(cuid())
+  meterNumber   String
+  meterName     String
+  meterType     MeterType
+  meterReadings MeterReading[]
+}
+
+model MeterReading {
+  id                 String   @id @default(cuid())
+  meter              Meter    @relation(fields: [meterId], references: [id])
+  meterId            String
+  startInterval      DateTime
+  consumption        Int
+  consumptionUnit    String
+  carbonEmission     Int?
+  carbonEmissionUnit String?
+  accountId          String
+  customerId         String
+  meterNumber        String
+}
+
 model Address {
   id                String   @id @unique
   latitude          Float

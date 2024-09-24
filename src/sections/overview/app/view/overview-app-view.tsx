@@ -37,6 +37,9 @@ import { AppResumeFiles } from '../app-resume-files';
 import { AppJobApplication } from '../app-job-application';
 import AppOnboardingView from '../app-onboarding';
 import { AppMap } from '../app-map';
+import { FormWizardView } from '../app-onboarding-view';
+import AppSmartSwitchChartView from '../app-smart-switch-chart/view';
+import { AppSmartSaving } from '../app-smart-saving';
 
 // ----------------------------------------------------------------------
 
@@ -45,7 +48,8 @@ export function OverviewAppView() {
 
   return (
     <DashboardContent maxWidth="xl">
-      <AppOnboardingView />
+      {/* <AppOnboardingView /> */}
+      <FormWizardView />
       <Grid container spacing={1}>
         <Grid xs={12} md={6}>
           <AppWidgetSummary
@@ -69,21 +73,31 @@ export function OverviewAppView() {
           /> */}
           <AppMap />
         </Grid>
-        <Grid xs={12} md={6}>
-          <AppWidgetSummary
-            title="Application submitted"
-            percent={10}
-            total={139}
-            chart={{
-              colors: [theme.vars.palette.info.main],
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [20, 41, 63, 33, 28, 35, 50, 46],
-            }}
-          />
+
+        <Grid xs={12} md={6} lg={4}>
+        <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: { xs: 3, md: 0 },
+                  borderRadius: { md: 2 },
+                  bgcolor: { md: 'background.paper' },
+                }}
+              >
+          <AppSmartSaving 
+                            title="Total saving"
+                            total={18765}
+                            percent={2.6}
+                            chart={{
+                              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                              series: [{ data: [10, 41, 80, 100, 60, 120, 69, 91, 160] }],
+                            }}/>
+
+              </Box>
+
         </Grid>
-
-        <Grid xs={12} md={8}>
-
+        <Grid xs={12} md={6} lg={8}>
+            <AppSmartSwitchChartView />
         </Grid>
       </Grid>
     </DashboardContent>
