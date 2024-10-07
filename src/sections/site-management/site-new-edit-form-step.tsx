@@ -16,10 +16,16 @@ import { Icon } from '@iconify/react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { toast } from 'src/components/snackbar';
 import { useFormContext } from 'react-hook-form';
-import { WizardSchemaType } from './form-wizard';
 import Card from '@mui/material/Card';
-
+import { z as zod } from 'zod';
+import { schemaHelper } from 'src/components/hook-form';
+import CardHeader from '@mui/material/CardHeader';
+import Divider from '@mui/material/Divider';
+import Stack from '@mui/material/Stack';
+import { CONFIG } from 'src/config-global';
+import { Image } from 'src/components/image';
 // ----------------------------------------------------------------------
+import { NewSiteSchemaType } from './site-new-edit-form';
 
 type StepperProps = {
   steps: string[];
@@ -130,11 +136,13 @@ export function StepOne() {
 // }
 
   return (
-    <>
-    <Typography id="modal-modal-title" variant="h6" component="h2">
-      Basic Information
-    </Typography>
-    <Box component="form" sx={{ mt: 2 }}>
+    <Card>
+
+        <CardHeader title="Site details" subheader="Site name and location" sx={{mb: 3}} />
+        <Divider />
+            <Stack spacing={3} sx={{p: 3}}>
+    
+    <Box>
       <Field.Text
         inputRef={siteNameRef}
         fullWidth
@@ -213,46 +221,115 @@ export function StepOne() {
           </Box>
         )}
     </Box>
-  </>
+    </Stack>
+    </Card>
   );
 }
-export function StepTwo() {
-  const { getValues } = useFormContext<WizardSchemaType>();
 
+
+const MeterDetails = ({ meter }: { meter: MeterDetails }) => {
+    return (
+      <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2, bgcolor: 'background.paper' }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'primary.main' }}>
+          <Icon icon="mdi:meter-electric" style={{ marginRight: 8 }} />
+          Meter Details
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Icon icon="mdi:identifier" style={{ marginRight: 8, color: 'text.secondary' }} />
+              Device ID: {meter.deviceId}
+            </Typography>
+            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Icon icon="mdi:factory" style={{ marginRight: 8, color: 'text.secondary' }} />
+              Manufacturer: {meter.deviceManufacturer}
+            </Typography>
+            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Icon icon="mdi:cellphone" style={{ marginRight: 8, color: 'text.secondary' }} />
+              Model: {meter.deviceModel}
+            </Typography>
+          </Grid>
+          <Grid item xs={6}>
+            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Icon icon="mdi:check-circle" style={{ marginRight: 8, color: 'text.secondary' }} />
+              Status: {meter.deviceStatus}
+            </Typography>
+            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Icon icon="mdi:tag" style={{ marginRight: 8, color: 'text.secondary' }} />
+              Type: {meter.deviceType}
+            </Typography>
+            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Icon icon="mdi:numeric" style={{ marginRight: 8, color: 'text.secondary' }} />
+              MPxN: <span style={{ textDecoration: 'underline dotted', marginLeft: 4 }}>{" " + meter.mpxn}</span>
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Icon icon="mdi:map-marker" style={{ marginRight: 8, color: 'text.secondary' }} />
+              Address Identifier:{" "} <span style={{ fontWeight: 'bold', marginLeft: 4 }}>{" " + meter.addressIdentifier}</span>
+            </Typography>
+            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Icon icon="mdi:map" style={{ marginRight: 8, color: 'text.secondary' }} />
+              Post Code:{" "} <span style={{ fontWeight: 'bold', marginLeft: 4 }}>{" " + meter.postCode}</span>
+            </Typography>
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  }
+
+type MeterDetails = {
+  id: string
+  deviceId: string
+  deviceManufacturer: string
+  deviceModel: string
+  deviceStatus: string
+  deviceType: string
+  mpxn: string
+addressIdentifier: string,
+postCode: string,
+}
+
+export function StepTwo() {
+  const { getValues, clearErrors, formState: {errors}, setValue } = useFormContext<NewSiteSchemaType>();
+  const [meter, setMeter] = useState<MeterDetails | null>(null);
   const [mpxnLoading, setMpxnLoading] = useState<boolean>(false)
   const { mutateAsync: e3CheckMPXN } = api.common.e3CheckMPXN.useMutation();
-  const { mutateAsync: e3GenerateSessionId } = api.common.e3GenerateSessionId.useMutation();
   const [mpxnError, setMpxnError] = useState<string | null>(null)
-  const [formData, setFormData] = useState<WizardSchemaType | null>(null)
+
 
 
 
   const checkMPXN = async () => {
+    clearErrors();
     setMpxnLoading(true)
-    const {status} = await e3CheckMPXN({mpxn: getValues('stepTwo.mpxn')})
-    console.log('status', status)
+    const {status, response} = await e3CheckMPXN({mpxn: getValues('stepTwo.mpxn')})
     if (status !== 'success') {
       setMpxnError(status || '')
+      setMeter(null)
     } else {
       setMpxnError(null)
-      const {sessionId, encodedQueryStringParams} = await e3GenerateSessionId({mpxn: getValues('stepTwo.mpxn')})
-      console.log('sessionId', sessionId)
-      console.log('encodedQueryStringParams', encodedQueryStringParams)
-      window.open(`${process.env.NEXT_PUBLIC_E3_CONSENT_PORTAL_URL}/consent/${encodedQueryStringParams}`, '_blank', 'width=1400,height=1000');
+      if(response){
+        setMeter(response)
+        setValue('stepTwo.smartMeterId', response.id, { shouldValidate: true })
+      } 
     }
     setMpxnLoading(false)
   }
 
+
+  useEffect(() => {
+    setValue('stepTwo.smartMeterId', '' )
+  }, [])
   
   return (
 
-<>
-<Box display="flex" flexDirection="column" gap={0.5}>
-  <Typography variant="h6">MPxN Number</Typography>
-  <Typography variant="caption" gutterBottom>
-    Find the MPAN/MPRN number on your electricity bill to connect your smart meter.
-  </Typography>
+<Card>
 
+  <CardHeader title="MPxN Number" subheader="Find the MPAN/MPRN number on your electricity bill to connect your smart meter." sx={{mb: 3}} />
+  <Divider />
+
+  <Stack spacing={3} sx={{p: 3}}>
   <Box display="flex" alignItems="center" width="100%">
     <Box display="flex" flexDirection='column' width="100%">
     <Field.Text
@@ -272,32 +349,60 @@ export function StepTwo() {
   )}
     </Box>
 
-    {!mpxnLoading && <Button variant="contained" color="success" sx={{ ml: 2, px: 2}} startIcon={<Iconify icon="mdi:flash" />} onClick={checkMPXN} disabled={mpxnLoading}>
-      Connect
+    {!mpxnLoading && <Button variant="contained" sx={{ ml: 2, px: 2, bgcolor: 'primary.main'}} startIcon={<Iconify icon="mdi:search" />} onClick={checkMPXN} disabled={mpxnLoading}>
+      Search
     </Button>}
     {mpxnLoading && <CircularProgress size={24} sx={{ ml: 2 }} />}
   </Box>
-</Box>
+
+
 <Card sx={{ p: 2, mb: 2 }}>
   <Box display="flex" alignItems="center" flexDirection="column">
-    {
-      formData?.stepOne.address.address && (
-        <Typography variant="h6">
-          {formData?.stepOne.address.address}
-        </Typography>
-      )
-    }
-    <Typography id="modal-modal-title" marginTop={2}>
-      Smart meter status:
+
+    {!meter &&     
+    <Stack direction="column" spacing={3} alignItems="center">
+    <Box>
+    <Typography variant="body1">
+      Find your MPAN/MPRN number on your electricity bill
     </Typography>
-    <Field.Switch name="stepTwo.smartMeterSwitch" label="offline" disabled sx={{ ml: 2 }}/>
+    <Typography variant="caption" color="text.secondary">
+      Look for the below pattern on your bill, it's a 11-13 digit number
+    </Typography>
+    </Box>
+
+    <Image
+        src={`${CONFIG.site.basePath}/assets/images/dashboard/mpan.webp`}
+        alt="mpan"
+      />
+    </Stack>}
+    {
+        meter && <MeterDetails meter={meter} />
+    }
+
+    <Field.Text name="stepTwo.smartMeterId" sx={{ ml: 2, display: 'none' }} value={meter?.id || ''}/>
+    {errors.stepTwo?.smartMeterId && <Typography variant="body1" gutterBottom color="error" sx={{mt: 2, fontWeight: 'bold'}}>
+    {errors.stepTwo?.smartMeterId.message}
+  </Typography>}
   </Box>
 
 </Card>
+</Stack>
 
-</>
+</Card>
   );
 
 }
 
 
+
+export function StepThree() {
+
+  return (
+
+<Card>
+
+<CardHeader title="Verify your identity" subheader="Upload a picture of your recent bill with address visible. (within 3 months)" sx={{mb: 3}} />
+<Divider />
+</Card>
+  )
+}

@@ -80,23 +80,99 @@ export const commonRouter = router({
         }
     }),
 
+    e3GenerateSessionId: protectedProcedure.input(z.object({
+        mpxn: z.string(),
+    })).mutation(async (opts) => {
+        const { mpxn } = opts.input;
+        const supabase = opts.ctx.supabase;
+        const successURL =  'http://localhost:3000/success'
+        const failureURL = 'http://localhost:3000/failure'
+        const user = (await supabase.auth.getUser()).data.user;
+        const apiKey = process.env.E3_API_KEY;
+        const response = await fetch(`${process.env.E3_CONSENT_BASE_URL}/consents/session`, {
+            method: 'POST',
+            headers: {
+                'x-api-key': `${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ mpxn, getHistoryData: true, electricityExportUpdateFrequency: '3h', gasUpdateFrequency: '3h' }),
+        });
+
+        const sessionId = (await response.json()).sessionId
+
+        const queryStringParams = `sessionId=${sessionId}&successUrl=${successURL}&errorUrl=${failureURL}&automaticDirect=true`
+
+        const encodedQueryStringParams = Buffer.from(queryStringParams).toString('base64');
+
+    const existingSession = await prisma.e3ConnectSession.findFirst({
+        where: {
+            status: 'PENDING',
+        },
+    });
+
+    if (existingSession) {
+        return { sessionId: existingSession.id, encodedQueryStringParams };
+    } else {
+        const newSession = await prisma.e3ConnectSession.create({
+            data: {
+                status: 'PENDING',
+                user: {
+                    connect: { id: user?.id }
+                },
+            },
+        });
+
+        return { sessionId: newSession.id, encodedQueryStringParams };
+    }
+
+}),
+
 
     e3CheckMPXN: protectedProcedure.input(z.object({
         mpxn: z.string(),
     })).mutation(async (opts) => {
         const { mpxn } = opts.input;
         const apiKey = process.env.E3_API_KEY;
+
+
+        const existingMeter = await prisma.meter.findUnique({
+            where: {
+                mpxn: mpxn,
+            },
+        });
+
+        if (existingMeter) {
+            return { status: 'success', response: existingMeter };
+        }
+        
         const response = await fetch(`${process.env.E3_API_BASE_URL}/find-mpxn/${mpxn}`, {
             headers: {
                 'x-api-key': `${apiKey}`,
             },
         });
         if (response.status === 200) {
-            return { status: 'success' };
+
+            const meterData = await response.json()
+
+            const meter = await prisma.meter.create({
+                data: {
+                    deviceId: meterData.deviceId,
+                    deviceManufacturer: meterData.deviceManufacturer,
+                    
+                    deviceModel: meterData.deviceModel,
+                    deviceStatus: meterData.deviceStatus,
+                    deviceType: meterData.deviceType,
+                    mpxn,
+                    addressIdentifier: meterData.propertyFilter.addressIdentifier,
+                    postCode: meterData.propertyFilter.postCode,
+                },
+            });
+
+            return { status: 'success', response: meter };
         } else if (response.status === 400) {
             return { status: 'wrong MPxN number' };
         } else if (response.status === 404) {
-            return { status: 'no meter found on MPxN' };
+            return { status: 'We couldn\'t find your meter, please double check the MPxN number and try again.' };
         } else if (response.status === 403) {
             return { status: 'server error, please contact support'}
         } 

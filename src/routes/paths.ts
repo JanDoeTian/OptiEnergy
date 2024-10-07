@@ -95,7 +95,6 @@ export const paths = {
   // DASHBOARD
   dashboard: {
     root: ROOTS.DASHBOARD,
-    siteManagement: `${ROOTS.DASHBOARD}/site-management`,
     mail: `${ROOTS.DASHBOARD}/mail`,
     chat: `${ROOTS.DASHBOARD}/chat`,
     blank: `${ROOTS.DASHBOARD}/blank`,
@@ -103,6 +102,13 @@ export const paths = {
     calendar: `${ROOTS.DASHBOARD}/calendar`,
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
     permission: `${ROOTS.DASHBOARD}/permission`,
+    siteManagement: {
+      root: `${ROOTS.DASHBOARD}/site-management`,
+      list: `${ROOTS.DASHBOARD}/site-management/list`,
+      new: `${ROOTS.DASHBOARD}/site-management/new`,
+      details: (id: string) => `${ROOTS.DASHBOARD}/site-management/${id}`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/site-management/${id}/edit`,
+    },
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
       ecommerce: `${ROOTS.DASHBOARD}/ecommerce`,

@@ -21,6 +21,7 @@ model User {
   userUploads      UserUpload[]
   sites            Site[]
   fpConnectSession FPConnectSession[]
+  e3ConnectSession E3ConnectSession[]
 }
 
 model UserUpload {
@@ -51,11 +52,16 @@ enum MeterType {
 }
 
 model Meter {
-  id            String         @id @default(cuid())
-  meterNumber   String
-  meterName     String
-  meterType     MeterType
-  meterReadings MeterReading[]
+  id                 String         @id @default(cuid())
+  deviceId           String
+  deviceManufacturer String
+  deviceModel        String
+  deviceStatus       String
+  deviceType         String
+  mpxn               String         @unique
+  addressIdentifier  String
+  postCode           String
+  meterReadings      MeterReading[]
 }
 
 model MeterReading {
@@ -94,6 +100,20 @@ model Address {
   country           String
   residential       Boolean
   site              Site[]
+}
+
+enum E3ConnectSessionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model E3ConnectSession {
+  id            String                 @id @default(uuid())
+  user          User                   @relation(fields: [userId], references: [id])
+  userId        String
+  status        E3ConnectSessionStatus @default(PENDING)
+  failureReason String?
 }
 
 model FPConnectSession {

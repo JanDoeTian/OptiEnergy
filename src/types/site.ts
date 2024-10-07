@@ -1,9 +1,16 @@
+
+type Message = {
+  id: string;
+  type: 'info' | 'warning'
+  message: string;
+  createdAt: string;
+}
 export type ISiteItem = {
   id: string;
   name: string;
+  longitude: number;
+  latitude: number;
   address: string;
-  phoneNumber: string;
-  email: string;
-  website: string;
+  messages: Message[];
   createdAt: string;
 };
