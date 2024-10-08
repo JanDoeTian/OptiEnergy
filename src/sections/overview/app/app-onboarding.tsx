@@ -27,7 +27,7 @@ type Option = {
   id: string;
   address: string;
   url: string;
-}
+};
 
 enum ScreenState {
   Initial,
@@ -36,9 +36,9 @@ enum ScreenState {
 }
 
 function parsePostcode(postcodeAsString: string) {
-  let outward = ''
-  let inward = ''
-  if (typeof postcodeAsString === "string") {
+  let outward = '';
+  let inward = '';
+  if (typeof postcodeAsString === 'string') {
     var clean = postcodeAsString.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (clean.match(/^[A-Z]{1,2}[0-9R][0-9A-Z]?[0-9][ABD-HJLNP-UW-Z]{2}$/)) {
       outward = clean.substring(0, clean.length - 3);
@@ -48,7 +48,7 @@ function parsePostcode(postcodeAsString: string) {
     }
   }
   return outward + ' ' + inward;
-};
+}
 export default function AppOnboardingView() {
   const [open, setOpen] = React.useState(true);
   const [screenState, setScreenState] = React.useState<ScreenState>(ScreenState.Initial);
@@ -76,16 +76,19 @@ export default function AppOnboardingView() {
   };
 
   const newFPConnectSessionMutation = api.user.newFPConnectSession.useMutation();
-    const addAddressMutation = api.common.addAddress.useMutation();
+  const addAddressMutation = api.common.addAddress.useMutation();
   const [siteName, setSiteName] = React.useState('');
   const [value, setValue] = React.useState<Option | null>(null);
   const [postcode, setPostcode] = React.useState('');
-  const [options, setOptions] = React.useState<{id: string, address: string, url: string}[]>([]);
+  const [options, setOptions] = React.useState<{ id: string; address: string; url: string }[]>([]);
 
-  const {refetch} = api.common.postcodeAutocomplete.useQuery({ postcode },   {
-    enabled: false,
-    retry: false,
-  });
+  const { refetch } = api.common.postcodeAutocomplete.useQuery(
+    { postcode },
+    {
+      enabled: false,
+      retry: false,
+    }
+  );
 
   const handleOpen = () => setOpen(true);
   const handleClose = (_event: any, reason: string) => {
@@ -94,19 +97,17 @@ export default function AppOnboardingView() {
 
   const fetchPostcodeSuggestions = async () => {
     if (postcode.length > 3) {
-      const {data} = await refetch()
-      if (data &&data.suggestions && data.suggestions.length > 0) {
-        
+      const { data } = await refetch();
+      if (data && data.suggestions && data.suggestions.length > 0) {
         setOptions(data.suggestions);
       }
     }
   };
 
-  React.useEffect(()=>{
+  React.useEffect(() => {
     let active = true;
 
-    if (postcode === ''){
-
+    if (postcode === '') {
       setOptions(value ? [value] : []);
       return undefined;
     }
@@ -114,15 +115,16 @@ export default function AppOnboardingView() {
     return () => {
       active = false;
     };
-  }, [value, postcode])
-
-
+  }, [value, postcode]);
 
   const handleConnectMeter = async () => {
     setScreenState(ScreenState.Connecting);
     try {
-      await addAddressMutation.mutateAsync({id: value!.id});
-      const { fp_id, fp_cot } = await newFPConnectSessionMutation.mutateAsync({addressId: value!.id, siteName: siteName});
+      await addAddressMutation.mutateAsync({ id: value!.id });
+      const { fp_id, fp_cot } = await newFPConnectSessionMutation.mutateAsync({
+        addressId: value!.id,
+        siteName: siteName,
+      });
       setFPID(fp_id);
       window.open(process.env.NEXT_PUBLIC_FLATPEAK_CONNECT_URL, '_blank', 'width=440,height=934');
 
@@ -159,14 +161,30 @@ export default function AppOnboardingView() {
       >
         <Card sx={style}>
           {screenState === ScreenState.Connecting ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+              }}
+            >
               <CircularProgress size={48} sx={{ color: 'blue' }} />
               <Typography variant="body1" sx={{ mt: 2 }}>
                 Please connect to your energy supplier on the popup window.
               </Typography>
             </Box>
           ) : screenState === ScreenState.Success ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+              }}
+            >
               <Icon icon="ooui:success" style={{ color: 'green', fontSize: 48 }} />
               <Typography variant="body1" sx={{ mt: 1 }}>
                 Successfully linked to your meter
@@ -193,19 +211,19 @@ export default function AppOnboardingView() {
                 <Autocomplete
                   fullWidth
                   value={value}
-                  noOptionsText={"Enter a postcode to search"}
+                  noOptionsText={'Enter a postcode to search'}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
                   autoComplete
                   onInputChange={(_, value) => {
-                    const parsed = parsePostcode(value)
+                    const parsed = parsePostcode(value);
 
-                    setPostcode(parsed)
+                    setPostcode(parsed);
                     // setPostcode(value)
                   }}
                   id="postcode"
                   options={options}
                   onChange={(_, value) => {
-                    setValue(value)
+                    setValue(value);
                   }}
                   getOptionLabel={(option) => option.address}
                   renderInput={(params) => (
@@ -229,7 +247,7 @@ export default function AppOnboardingView() {
                           </Grid>
                           <Grid item sx={{ width: 'calc(100% - 44px)', wordWrap: 'break-word' }}>
                             <Box component="span" sx={{ fontWeight: 'bold' }}>
-                                                           {firstPart}
+                              {firstPart}
                             </Box>
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                               {remainingParts}
@@ -239,29 +257,29 @@ export default function AppOnboardingView() {
                       </li>
                     );
                   }}
-                  />
-                  
-                  {value && (
-                    <Box sx={{ mt: 2, backgroundColor: 'lightgray', p: 2 }}>
-                      <Typography variant="body1">
-                        {value.address.split(',').map((part, index) => (
-                          <span key={index}>
-                            {part.trim()}
-                            {index < value.address.split(',').length - 1 && <br />}
-                          </span>
-                        ))}
-                      </Typography>
-                      <Button
-                        type="button"
-                        variant="contained"
-                        sx={{ mt: 2, backgroundColor: 'blue' }}
-                        onClick={handleConnectMeter}
-                      >
-                        <Icon icon="mdi:flash" style={{ color: 'yellow', marginRight: '8px' }} />
-                        Connect meter
-                      </Button>
-                    </Box>
-                  )}
+                />
+
+                {value && (
+                  <Box sx={{ mt: 2, backgroundColor: 'lightgray', p: 2 }}>
+                    <Typography variant="body1">
+                      {value.address.split(',').map((part, index) => (
+                        <span key={index}>
+                          {part.trim()}
+                          {index < value.address.split(',').length - 1 && <br />}
+                        </span>
+                      ))}
+                    </Typography>
+                    <Button
+                      type="button"
+                      variant="contained"
+                      sx={{ mt: 2, backgroundColor: 'blue' }}
+                      onClick={handleConnectMeter}
+                    >
+                      <Icon icon="mdi:flash" style={{ color: 'yellow', marginRight: '8px' }} />
+                      Connect meter
+                    </Button>
+                  </Box>
+                )}
               </Box>
             </>
           )}

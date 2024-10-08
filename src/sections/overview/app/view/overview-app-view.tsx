@@ -75,29 +75,28 @@ export function OverviewAppView() {
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
-        <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: { xs: 3, md: 0 },
-                  borderRadius: { md: 2 },
-                  bgcolor: { md: 'background.paper' },
-                }}
-              >
-          <AppSmartSaving 
-                            title="Total saving"
-                            total={18765}
-                            percent={2.6}
-                            chart={{
-                              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-                              series: [{ data: [10, 41, 80, 100, 60, 120, 69, 91, 160] }],
-                            }}/>
-
-              </Box>
-
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: { xs: 3, md: 0 },
+              borderRadius: { md: 2 },
+              bgcolor: { md: 'background.paper' },
+            }}
+          >
+            <AppSmartSaving
+              title="Total saving"
+              total={18765}
+              percent={2.6}
+              chart={{
+                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                series: [{ data: [10, 41, 80, 100, 60, 120, 69, 91, 160] }],
+              }}
+            />
+          </Box>
         </Grid>
         <Grid xs={12} md={6} lg={8}>
-            <AppSmartSwitchChartView />
+          <AppSmartSwitchChartView />
         </Grid>
       </Grid>
     </DashboardContent>

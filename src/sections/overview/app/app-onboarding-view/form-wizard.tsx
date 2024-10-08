@@ -11,7 +11,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { toast } from 'src/components/snackbar';
 import { Form, schemaHelper } from 'src/components/hook-form';
 
-import { Stepper, StepOne, StepTwo} from './form-steps';
+import { Stepper, StepOne, StepTwo } from './form-steps';
 import { StepThree } from 'src/sections/site-management/site-new-edit-form-step';
 
 // ----------------------------------------------------------------------
@@ -19,19 +19,24 @@ import { StepThree } from 'src/sections/site-management/site-new-edit-form-step'
 const steps = ['Add site', 'Connect smart meter', 'Connect tariff'];
 
 const StepOneSchema = zod.object({
-  siteName: zod.string().min(3, { message: 'Site name should be at least 3 characters!' })
-                    .max(50, { message: 'Site name should be at most 50 characters!' }),
+  siteName: zod
+    .string()
+    .min(3, { message: 'Site name should be at least 3 characters!' })
+    .max(50, { message: 'Site name should be at most 50 characters!' }),
   address: schemaHelper.objectOrNull({
     message: { required_error: 'Address is required!' },
   }),
 });
 
 const StepTwoSchema = zod.object({
-  mpxn: zod.string().min(11, { message: 'MPxN should be at least 11 digits!' }).max(13, { message: 'MPxN should be at most 13 digits!' }),
-  smartMeterSwitch: schemaHelper.boolean({ message: { required_error: 'Smart meter connection is required!' } }),
-})
-
-
+  mpxn: zod
+    .string()
+    .min(11, { message: 'MPxN should be at least 11 digits!' })
+    .max(13, { message: 'MPxN should be at most 13 digits!' }),
+  smartMeterSwitch: schemaHelper.boolean({
+    message: { required_error: 'Smart meter connection is required!' },
+  }),
+});
 
 const WizardSchema = zod.object({
   stepOne: StepOneSchema,
@@ -45,11 +50,7 @@ export type WizardSchemaType = zod.infer<typeof WizardSchema>;
 const defaultValues = {
   stepOne: { siteName: '', address: '' },
   stepTwo: { mpxn: '' },
-
 };
-
-
-
 
 export function FormWizard() {
   const [activeStep, setActiveStep] = useState(0);
@@ -70,10 +71,10 @@ export function FormWizard() {
   } = methods;
 
   const handleNext = useCallback(
-    async (step?: 'stepOne' | 'stepTwo' ) => {
+    async (step?: 'stepOne' | 'stepTwo') => {
       if (step) {
         const isValid = await trigger(step);
-        console.log('isValid', isValid)
+        console.log('isValid', isValid);
         if (isValid) {
           setActiveStep((prevActiveStep) => prevActiveStep + 1);
         }
@@ -87,8 +88,6 @@ export function FormWizard() {
   const handleBack = useCallback(() => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   }, []);
-
-
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -104,9 +103,19 @@ export function FormWizard() {
 
   const completedStep = activeStep === steps.length;
 
-
   return (
-    <Card sx={{ p: 5, width: 1, mx: 'auto', maxWidth: 720, position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+    <Card
+      sx={{
+        p: 5,
+        width: 1,
+        mx: 'auto',
+        maxWidth: 720,
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      }}
+    >
       <Form methods={methods} onSubmit={onSubmit}>
         <Stepper steps={steps} activeStep={activeStep} />
 
@@ -149,7 +158,6 @@ export function FormWizard() {
             )}
           </Box>
         )}
-
       </Form>
     </Card>
   );

@@ -1,19 +1,19 @@
-import { ISiteItem } from "src/types/site";
+import { ISiteItem } from 'src/types/site';
 
-import { useCallback } from "react";
+import { useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Pagination, { paginationClasses } from '@mui/material/Pagination';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
-import { SiteItem } from "./site-item";
+import { SiteItem } from './site-item';
 
 type Props = {
-    sites: ISiteItem[];
-  };
-  
-export function SiteList({sites}: Props) {
+  sites: ISiteItem[];
+};
+
+export function SiteList({ sites }: Props) {
   const router = useRouter();
 
   const handleView = useCallback(
@@ -29,11 +29,10 @@ export function SiteList({sites}: Props) {
     },
     [router]
   );
-  
+
   const handleDelete = useCallback((id: string) => {
     console.info('DELETE', id);
   }, []);
-
 
   return (
     <>

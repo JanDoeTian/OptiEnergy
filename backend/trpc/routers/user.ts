@@ -20,39 +20,36 @@ export const userRouter = router({
   //     });
   //   }),
 
+  deleteFile: protectedProcedure.input(z.object({ id: z.string() })).mutation(async (opts) => {
+    const { id } = opts.input;
+    const supabase = opts.ctx.supabase;
+    const user = (await supabase.auth.getUser()).data.user;
 
-  deleteFile: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async (opts) => {
-      const { id } = opts.input;
-      const supabase = opts.ctx.supabase;
-      const user = (await supabase.auth.getUser()).data.user;
+    // Find the file to delete
+    const fileToDelete = await prisma.userUpload.findUnique({
+      where: {
+        id,
+      },
+    });
 
-      // Find the file to delete
-      const fileToDelete = await prisma.userUpload.findUnique({
-        where: {
-          id,
-        },
-      });
+    if (!fileToDelete) {
+      throw new Error('File not found');
+    }
 
-      if (!fileToDelete) {
-        throw new Error('File not found');
-      }
+    // Delete the file from Supabase storage
+    const { error } = await supabase.storage
+      .from('app')
+      .remove([`${user?.id}/${fileToDelete.fileName}`]);
 
-      // Delete the file from Supabase storage
-      const { error } = await supabase.storage
-        .from('app')
-        .remove([`${user?.id}/${fileToDelete.fileName}`]);
-
-      if (error) {
-        throw new Error(error.message);
-      }
-      await prisma.userUpload.delete({
-        where: {
-          id,
-        },
-      });
-    }),
+    if (error) {
+      throw new Error(error.message);
+    }
+    await prisma.userUpload.delete({
+      where: {
+        id,
+      },
+    });
+  }),
 
   // Add a file to the user's storage
   addFile: protectedProcedure
@@ -72,27 +69,26 @@ export const userRouter = router({
       if (userFilesCount >= CONFIG.upload.maxNumFiles) {
         throw new Error(`You can only upload up to ${CONFIG.upload.maxNumFiles} files.`);
       }
-      
+
       const { data, error } = await supabase.storage
         .from('app')
         .upload(`${user?.id}/${name}`, buffer);
 
-
-        if (data) {
-          // Create a new user upload record in the database
-          await prisma.userUpload.create({
-            data: {
-              fileId: data.id,
-              fileUrl: data.path,
-              fileName: name,
-              user: {
-                connect: {
-                  id: user?.id,
-                },
+      if (data) {
+        // Create a new user upload record in the database
+        await prisma.userUpload.create({
+          data: {
+            fileId: data.id,
+            fileUrl: data.path,
+            fileName: name,
+            user: {
+              connect: {
+                id: user?.id,
               },
             },
-          });
-        }
+          },
+        });
+      }
 
       if (error) {
         throw new Error(error.message);
@@ -114,7 +110,7 @@ export const userRouter = router({
       },
     });
 
-    const parsedData = userFiles.map(file => ({
+    const parsedData = userFiles.map((file) => ({
       ...file,
       updatedAt: file.updatedAt.toISOString().split('T')[0], // Extract only the date part
     }));
@@ -122,12 +118,13 @@ export const userRouter = router({
     return parsedData;
   }),
 
-
   newFPConnectSession: protectedProcedure
-    .input(z.object({
-      addressId: z.string(),
-      siteName: z.string(),
-    }))
+    .input(
+      z.object({
+        addressId: z.string(),
+        siteName: z.string(),
+      })
+    )
     .mutation(async (opts) => {
       const supabase = opts.ctx.supabase;
       const user = (await supabase.auth.getUser()).data.user;
@@ -159,7 +156,7 @@ export const userRouter = router({
       // const data = await response.json();
       // const fp_cot = data.fp_cot;
       // const fp_status = data.fp_status;
-      const fp_cot="mock";
+      const fp_cot = 'mock';
 
       const fpConnectSession = await prisma.fPConnectSession.create({
         data: {
@@ -174,7 +171,7 @@ export const userRouter = router({
         },
       });
 
-    return { fp_id: fpConnectSession.id, fp_cot };
+      return { fp_id: fpConnectSession.id, fp_cot };
     }),
 
   checkFPConnectSession: protectedProcedure
@@ -193,5 +190,4 @@ export const userRouter = router({
 
       return fpConnectSession.fp_status;
     }),
-
 });

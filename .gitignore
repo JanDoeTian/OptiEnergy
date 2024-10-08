@@ -36,3 +36,6 @@ build
 .eslintcache
 .unimportedrc.json
 tsconfig.tsbuildinfo
+
+# Sentry Config File
+.env.sentry-build-plugin

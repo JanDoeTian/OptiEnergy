@@ -52,12 +52,13 @@ export const navData = [
     subheader: 'Overview',
     items: [
       { title: 'Dashboard', path: paths.dashboard.root, icon: ICONS.dashboard },
-      { title: 'Site management', path: paths.dashboard.siteManagement.root, icon: ICONS.site,
+      {
+        title: 'Site management',
+        path: paths.dashboard.siteManagement.root,
+        icon: ICONS.site,
 
-        children: [
-          { title: 'Create', path: paths.dashboard.siteManagement.new },
-        ]
-       },
+        children: [{ title: 'Create', path: paths.dashboard.siteManagement.new }],
+      },
       // { title: 'Ecommerce', path: paths.dashboard.general.ecommerce, icon: ICONS.ecommerce },
       // { title: 'Analytics', path: paths.dashboard.general.analytics, icon: ICONS.analytics },
       // { title: 'Banking', path: paths.dashboard.general.banking, icon: ICONS.banking },

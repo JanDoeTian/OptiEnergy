@@ -1,10 +1,9 @@
-
 type Message = {
   id: string;
-  type: 'info' | 'warning'
+  type: 'info' | 'warning';
   message: string;
   createdAt: string;
-}
+};
 export type ISiteItem = {
   id: string;
   name: string;

@@ -27,9 +27,8 @@ export function FormWizardView() {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        
         <FormWizard />
-        </Modal>
+      </Modal>
     </>
   );
 }

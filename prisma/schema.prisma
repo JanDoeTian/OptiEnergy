@@ -42,6 +42,9 @@ model Site {
   address    Address  @relation(fields: [addressId], references: [id])
   addressId  String
   locationId String
+  meter      Meter    @relation(fields: [meterId], references: [id])
+  meterId    String
+  moveInDate DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -51,31 +54,45 @@ enum MeterType {
   GAS
 }
 
+model MPXN {
+  id        String   @id @default(cuid())
+  mpxn      String   @unique
+  meter     Meter    @relation(fields: [meterId], references: [id])
+  meterId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Meter {
   id                 String         @id @default(cuid())
-  deviceId           String
+  deviceId           String         @unique
   deviceManufacturer String
   deviceModel        String
   deviceStatus       String
   deviceType         String
-  mpxn               String         @unique
+  mpxn               MPXN[]
   addressIdentifier  String
   postCode           String
   meterReadings      MeterReading[]
+  sites              Site[]
+}
+
+model CronError {
+  id        String   @id @default(cuid())
+  from      String
+  message   String
+  createdAt DateTime @default(now())
 }
 
 model MeterReading {
-  id                 String   @id @default(cuid())
-  meter              Meter    @relation(fields: [meterId], references: [id])
-  meterId            String
-  startInterval      DateTime
-  consumption        Int
-  consumptionUnit    String
-  carbonEmission     Int?
-  carbonEmissionUnit String?
-  accountId          String
-  customerId         String
-  meterNumber        String
+  id             String   @id @default(cuid())
+  meter          Meter    @relation(fields: [meterId], references: [id])
+  meterId        String
+  primaryValue   Float
+  secondaryValue Float    @default(0)
+  unit           String
+  timestamp      DateTime
+  createdAt      DateTime @default(now())
 }
 
 model Address {

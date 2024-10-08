@@ -1,13 +1,11 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from 'src/lib/prismaClient';
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export async function handler(req: NextRequest) {
   try {
     console.log('exchange-token updated at: ', new Date().toISOString());
     const body = await req.json();
-
 
     const fpConnectSession1Prisma = await prisma.fPConnectSession.findUnique({
       where: { id: body.fp_id },
@@ -27,7 +25,6 @@ export async function handler(req: NextRequest) {
       where: { id: body.id, key: body.key },
     });
 
-
     if (!internalKey) {
       return new NextResponse(JSON.stringify({ error: 'Invalid key' }), {
         status: 400,
@@ -43,7 +40,6 @@ export async function handler(req: NextRequest) {
       });
     }
 
-
     const fp_id = body.fp_id;
     const fpConnectSession = await prisma.fPConnectSession.findUnique({
       where: { id: fp_id },
@@ -57,9 +53,7 @@ export async function handler(req: NextRequest) {
     }
 
     //TODO: exchange location_id for a token.
-    const location_id = 'mock1234567890'
-
-    
+    const location_id = 'mock1234567890';
 
     return new NextResponse(JSON.stringify({ message: 'Key processed successfully' }), {
       status: 200,

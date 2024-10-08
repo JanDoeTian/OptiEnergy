@@ -189,6 +189,6 @@ export const paths = {
     },
     apis: {
       getAddress: `https://api.getaddress.io/autocomplete`,
-    }
+    },
   },
 };

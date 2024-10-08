@@ -1,4 +1,4 @@
-import { schema } from './schema'
+import { schema } from './schema';
 import { useState } from 'react';
 import { ApexOptions } from 'apexcharts';
 import { ChartBaseProps, ChartLoadingProps } from 'src/components/chart/types';
@@ -19,42 +19,37 @@ const ApexChart = withLoadingProps<WithLoadingProps>((props) =>
     loading: () => {
       const { loading, type } = props();
 
-
       return loading?.disabled ? null : <ChartLoading type={type} sx={loading?.sx} />;
     },
   })
 );
 
 export default function AppSmartSwitchChartView() {
-    const [state] = useState(schema);
+  const [state] = useState(schema);
 
-    return (
-      <Card>
-      <CardHeader
-        title={"Market overview"}
-        subheader={"Total"}
-        sx={{ mb: 3 }}
-      />
+  return (
+    <Card>
+      <CardHeader title={'Market overview'} subheader={'Total'} sx={{ mb: 3 }} />
       <Box
-      dir="ltr"
-      sx={{
-        width: '100%',
-        height: 450,
-        flexShrink: 0,
-        borderRadius: 1.5,
-        padding: 2,
-        position: 'relative',
-      }}
-    >
-      <ApexChart
-        options={state.options as ApexOptions}
-        series={state.series}
-        type="line"
-        height="100%"
-        width="100%"
-        loading={{ sx: { p: 2.5 } }}
-      />
+        dir="ltr"
+        sx={{
+          width: '100%',
+          height: 450,
+          flexShrink: 0,
+          borderRadius: 1.5,
+          padding: 2,
+          position: 'relative',
+        }}
+      >
+        <ApexChart
+          options={state.options as ApexOptions}
+          series={state.series}
+          type="line"
+          height="100%"
+          width="100%"
+          loading={{ sx: { p: 2.5 } }}
+        />
       </Box>
-      </Card>
-    );
+    </Card>
+  );
 }
