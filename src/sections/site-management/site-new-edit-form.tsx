@@ -24,8 +24,9 @@ import { toast } from 'src/components/snackbar';
 import { Form, Field, schemaHelper } from 'src/components/hook-form';
 import { Stepper, StepOne, StepTwo, StepThree } from './site-new-edit-form-step';
 import { Icon } from '@iconify/react';
+import { api } from 'backend/trpc/client';
 
-const steps = ['Add site', 'Connect meter', 'Consent', 'Connect tariff'];
+const steps = ['Add site', 'Connect meter', 'Consent'];
 
 const StepOneSchema = zod.object({
   siteName: zod
@@ -62,6 +63,8 @@ const defaultValues = {
 
 export function SiteNewEditForm() {
   const [activeStep, setActiveStep] = useState(0);
+  const addSiteMutation = api.user.addSite.useMutation();
+  const addAddressMutation = api.common.addAddress.useMutation();
   const router = useRouter();
 
   const methods = useForm<NewSiteSchemaType>({
@@ -94,13 +97,34 @@ export function SiteNewEditForm() {
     [trigger]
   );
 
+  
   const handleBack = useCallback(() => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   }, []);
 
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      await addAddressMutation.mutateAsync({
+        id: data.stepOne.address.id,
+      });
+      toast.success('Create success!');
+      console.info('DATA', data);
+      await addSiteMutation.mutateAsync({
+        addressId: data.stepOne.address.id,
+        siteName: data.stepOne.siteName,
+        meterId: data.stepTwo.smartMeterId,
+        mpxn: data.stepTwo.mpxn,
+        moveInDate: data.stepOne.moveInDate?.toString()!,
+      });
+      handleNext();
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
   const completedStep = activeStep === steps.length;
   return (
-    <Form methods={methods}>
+    <Form methods={methods} onSubmit={onSubmit}>
       <Stepper steps={steps} activeStep={activeStep} />
       <Stack spacing={5} sx={{ mx: 'auto', maxWidth: { xs: 720, xl: 800 } }}>
         {activeStep === 0 && <StepOne />}
@@ -117,6 +141,8 @@ export function SiteNewEditForm() {
               Back
             </Button>
           )}
+          
+          {activeStep !== 2 && (
           <Button
             variant="contained"
             onClick={() => handleNext(activeStep === 0 ? 'stepOne' : 'stepTwo')}
@@ -125,6 +151,13 @@ export function SiteNewEditForm() {
           >
             Next
           </Button>
+          )}
+          {activeStep === 2 && (
+              <LoadingButton type="submit" variant="contained" loading={isSubmitting} sx={{ backgroundColor: 'primary.main' }}>
+                Submit
+              </LoadingButton>
+            )}
+          
         </Stack>
       </Stack>
     </Form>

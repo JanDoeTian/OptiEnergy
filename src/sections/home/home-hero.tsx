@@ -58,9 +58,8 @@ export function HomeHero({ sx, ...other }: StackProps) {
   );
 
   const renderHeading = (
-    <MInview>
-      <Box
-        component="h1"
+    <Box
+      component="h1"
         display="flex"
         flexWrap="wrap"
         justifyContent="center"
@@ -74,7 +73,7 @@ export function HomeHero({ sx, ...other }: StackProps) {
         }}
       >
         <Box component="span" sx={{ width: 1, opacity: 0.38 }}>
-          Automate your job application
+          Compare your tariff
         </Box>
         with
         <Box
@@ -94,31 +93,27 @@ export function HomeHero({ sx, ...other }: StackProps) {
             ml: { xs: 0.75, md: 1, xl: 1.5 },
           }}
         >
-          AutoCV Pro
+          Wattio
         </Box>
-      </Box>
-    </MInview>
+    </Box>
   );
 
   const renderText = (
-    <MInview>
-      <Typography
-        variant="body2"
+    <Typography
+      variant="body2"
         sx={{
           mx: 'auto',
           [theme.breakpoints.up(smKey)]: { whiteSpace: 'pre' },
           [theme.breakpoints.up(lgKey)]: { fontSize: 20, lineHeight: '36px' },
         }}
       >
-        {`Upload your resume and AutoCV Pro will automatically apply to jobs for you.`}
-      </Typography>
-    </MInview>
+        {`Search from a wide range of energy brokers for lowest rate`}
+    </Typography>
   );
 
   const renderRatings = (
-    <MInview>
-      <Box
-        gap={1.5}
+    <Box
+      gap={1.5}
         display="flex"
         flexWrap="wrap"
         alignItems="center"
@@ -134,9 +129,8 @@ export function HomeHero({ sx, ...other }: StackProps) {
             />
           ))}
         </AvatarGroup>
-        160+ Offers landed
-      </Box>
-    </MInview>
+        Powering 1000+ businesses
+    </Box>
   );
 
   const renderButtons = (
@@ -262,7 +256,6 @@ export function HomeHero({ sx, ...other }: StackProps) {
         }}
       >
         <Container
-          component={MotionContainer}
           sx={{
             py: 3,
             gap: 5,
@@ -278,12 +271,12 @@ export function HomeHero({ sx, ...other }: StackProps) {
           }}
         >
           <Stack spacing={3} sx={{ textAlign: 'center' }}>
-            <m.div style={{ y: y1 }}>{renderHeading}</m.div>
-            <m.div style={{ y: y2 }}>{renderText}</m.div>
+            <div>{renderHeading}</div>
+            <div>{renderText}</div>
           </Stack>
-          <m.div style={{ y: y3 }}>{renderRatings}</m.div>
-          <m.div style={{ y: y4 }}>{renderButtons}</m.div>
-          <m.div style={{ y: y5 }}>{renderIcons}</m.div>
+          <div>{renderRatings}</div>
+          <div>{renderButtons}</div>
+          <div>{renderIcons}</div>
         </Container>
 
         <HeroBackground />

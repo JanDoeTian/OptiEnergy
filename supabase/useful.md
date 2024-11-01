@@ -59,3 +59,5 @@ $$;
 CREATE TRIGGER on_fp_connect_success AFTER UPDATE ON "public"."FPConnectSession" FOR EACH ROW EXECUTE FUNCTION handle_fp_connect_success();
 
 ```
+
+<!--  -->

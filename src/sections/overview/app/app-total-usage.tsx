@@ -3,6 +3,7 @@ import type { ChartOptions } from 'src/components/chart';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Tab from '@mui/material/Tab';
 import { useTheme, alpha as hexAlpha } from '@mui/material/styles';
 
 import { fPercent, fCurrency } from 'src/utils/format-number';
@@ -12,6 +13,9 @@ import { CONFIG } from 'src/config-global';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
 import { Chart, useChart } from 'src/components/chart';
+import { useTabs } from 'src/hooks/use-tabs';
+import { CustomTabs } from 'src/components/custom-tabs';
+import { tabsClasses } from '@mui/material/Tabs';
 
 // ----------------------------------------------------------------------
 
@@ -29,15 +33,29 @@ type Props = CardProps & {
   };
 };
 
-export function BookingTotalIncomes({ title, total, percent, chart, sx, ...other }: Props) {
+const TABS = [
+    { value: 'pound', label: '£' },
+    { value: 'kwh', label: 'kWh' },
+  ];
+
+export function AppTotalUsage({ title, total, percent, chart, sx, ...other }: Props) {
   const theme = useTheme();
 
+  const customTabs = useTabs('pound');
   const chartColors = chart.colors ?? [hexAlpha(theme.palette.primary.lighter, 0.64)];
 
+  const modifiedSeries = chart.series.map((serie) => ({
+    ...serie,
+    data: serie.data.map((value, index) => ({
+      x: chart.categories[index], // Assuming categories are aligned with data points
+      y: value,
+      fillColor: index === serie.data.length - 1 ? theme.palette.error.main : chartColors[0],
+    })),
+  }));
   const chartOptions = useChart({
     chart: { sparkline: { enabled: true } },
     colors: chartColors,
-    stroke: { width: 3 },
+    stroke: { width: 0 },
     grid: {
       padding: {
         top: 6,
@@ -48,25 +66,11 @@ export function BookingTotalIncomes({ title, total, percent, chart, sx, ...other
     },
     xaxis: { categories: chart.categories },
     tooltip: {
-      y: { formatter: (value: number) => fCurrency(value), title: { formatter: () => '' } },
+      y: { formatter: (value: number) => value + ' kWh', title: { formatter: () => '' } },
     },
     ...chart.options,
   });
 
-  const renderTrending = (
-    <Box gap={0.5} display="flex" alignItems="flex-end" flexDirection="column">
-      <Box sx={{ gap: 0.5, display: 'flex', alignItems: 'center', typography: 'subtitle2' }}>
-        <Iconify icon={percent >= 0 ? 'eva:trending-up-fill' : 'eva:trending-down-fill'} />
-        <Box component="span">
-          {percent > 0 && '+'}
-          {fPercent(percent)}
-        </Box>
-      </Box>
-      <Box component="span" sx={{ opacity: 0.64, typography: 'body2' }}>
-        last month
-      </Box>
-    </Box>
-  );
 
   return (
     <Card
@@ -82,14 +86,22 @@ export function BookingTotalIncomes({ title, total, percent, chart, sx, ...other
     >
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between' }}>
         <div>
-          <Box sx={{ mb: 1, typography: 'subtitle2' }}>{title}</Box>
-          <Box sx={{ typography: 'h3' }}>{fCurrency(total)}</Box>
+        <CustomTabs
+            value={customTabs.value}
+            onChange={customTabs.onChange}
+            variant="scrollable"
+            sx={{ mx: 'auto', maxWidth: 320, borderRadius:4, bgcolor: 'primary.darker'}}
+          >
+            {TABS.map((tab) => (
+              <Tab key={tab.value} value={tab.value} label={tab.label} sx={{color: 'primary.lighter'}}/>
+            ))}
+          </CustomTabs>
+          <Box sx={{ typography: 'h3' }}>{total} <Box component="span" sx={{ typography: 'body1' }}>£</Box></Box>
         </div>
 
-        {renderTrending}
       </Box>
 
-      <Chart type="bar" series={chart.series} options={chartOptions} height={120} />
+      <Chart type="bar" series={modifiedSeries} options={chartOptions} height={120} />
 
       <SvgColor
         src={`${CONFIG.site.basePath}/assets/background/shape-square.svg`}

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '../trpc';
 import { CONFIG } from 'backend/backend-config';
 import prisma from 'src/lib/prismaClient';
-
+import * as Sentry from '@sentry/nextjs';
 export const userRouter = router({
   getUsers: publicProcedure.query(async () => {
     return await prisma.user.findMany();
@@ -95,6 +95,52 @@ export const userRouter = router({
       }
 
       return;
+    }),
+
+
+  addSite: protectedProcedure
+    .input(z.object({ addressId: z.string(), siteName: z.string(), meterId: z.string(), mpxn: z.string(), moveInDate: z.string() }))
+    .mutation(async (opts) => {
+      const supabase = opts.ctx.supabase;
+      const user = (await supabase.auth.getUser()).data.user;
+      const { addressId, siteName, meterId, mpxn, moveInDate } = opts.input;
+      
+      
+      if(!user) {
+        Sentry.captureException('Fatal error: User not found', {
+          level: 'fatal',
+          extra: {
+            caller: 'addSite',
+          },
+        });
+      }
+
+      const mpxnData = await prisma.mPXN.findUnique({
+        where: {
+          mpxn,
+        },
+      });
+
+      if (!mpxnData) {
+        Sentry.captureException('Fatal error: MPXN not found', {
+          level: 'fatal',
+          extra: {
+            caller: 'addSite',
+            mpxn,
+          },
+        });
+      }
+
+      await prisma.site.create({
+        data: {
+          addressId,
+          siteName,
+          meterId,
+          mpxnId: mpxnData?.id!,
+          userId: user?.id!,
+          moveInDate: new Date(moveInDate),
+        },
+      });
     }),
 
   getFiles: protectedProcedure.query(async (opts) => {

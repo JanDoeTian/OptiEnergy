@@ -61,8 +61,8 @@ export function CustomTabs({ children, slotProps, sx, ...other }: CustomTabsProp
           },
         },
         [`& .${tabClasses.root}`]: {
-          py: 1,
-          px: 2,
+          py: 0,
+          px: 0.5,
           zIndex: 1,
           minHeight: 'auto',
           ...slotProps?.tab,

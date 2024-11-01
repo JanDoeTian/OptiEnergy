@@ -34,19 +34,26 @@ model UserUpload {
   updatedAt DateTime @default(now())
 }
 
+enum SiteVerificationStatus {
+  PENDING
+  VERIFIED
+}
+
 model Site {
-  id         String   @id @default(cuid())
-  siteName   String
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  address    Address  @relation(fields: [addressId], references: [id])
-  addressId  String
-  locationId String
-  meter      Meter    @relation(fields: [meterId], references: [id])
-  meterId    String
-  moveInDate DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                 String                 @id @default(cuid())
+  siteName           String
+  user               User                   @relation(fields: [userId], references: [id])
+  userId             String
+  address            Address                @relation(fields: [addressId], references: [id])
+  addressId          String
+  mpxn               MPXN                   @relation(fields: [mpxnId], references: [id])
+  mpxnId             String
+  moveInDate         DateTime
+  verificationStatus SiteVerificationStatus @default(PENDING)
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  meter              Meter                  @relation(fields: [meterId], references: [id])
+  meterId            String
 }
 
 enum MeterType {
@@ -57,24 +64,27 @@ enum MeterType {
 model MPXN {
   id        String   @id @default(cuid())
   mpxn      String   @unique
-  meter     Meter    @relation(fields: [meterId], references: [id])
-  meterId   String
+  meters    Meter[]
+  site      Site[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Meter {
-  id                 String         @id @default(cuid())
-  deviceId           String         @unique
-  deviceManufacturer String
-  deviceModel        String
-  deviceStatus       String
-  deviceType         String
-  mpxn               MPXN[]
-  addressIdentifier  String
-  postCode           String
-  meterReadings      MeterReading[]
-  sites              Site[]
+  id                        String                      @id @default(cuid())
+  deviceId                  String                      @unique
+  deviceManufacturer        String
+  deviceModel               String
+  deviceStatus              String
+  deviceType                String
+  mpxn                      MPXN                        @relation(fields: [mpxnId], references: [id]) // Each meter has one MPXN
+  mpxnId                    String
+  addressIdentifier         String
+  postCode                  String
+  meterReadings             MeterReading[]
+  sites                     Site[]
+  meterIntradayStatistics   MeterIntradayStatistics[]
+  meterWeekOfYearStatistics MeterWeekOfYearStatistics[]
 }
 
 model CronError {
@@ -93,6 +103,43 @@ model MeterReading {
   unit           String
   timestamp      DateTime
   createdAt      DateTime @default(now())
+}
+
+model MeterWeekOfYearStatistics {
+  id                 String   @id @default(cuid())
+  meter              Meter    @relation(fields: [meterId], references: [id])
+  meterId            String
+  weekOfYear         Int
+  mean               Float
+  median             Float
+  standardDeviation  Float
+  weekStartTimestamp DateTime
+  createdAt          DateTime @default(now())
+
+  @@index([meterId, weekOfYear])
+}
+
+model MeterIntradayStatistics {
+  id                String   @id @default(cuid())
+  meter             Meter    @relation(fields: [meterId], references: [id])
+  meterId           String
+  minuteOfHour      Int
+  hourOfDay         Int
+  weekOfYear        Int
+  mean              Float
+  median            Float
+  standardDeviation Float
+  upper95           Float
+  lower95           Float
+  upper90           Float
+  lower90           Float
+  upper80           Float
+  lower80           Float
+  upper70           Float
+  lower70           Float
+  upper50           Float
+  lower50           Float
+  createdAt         DateTime @default(now())
 }
 
 model Address {

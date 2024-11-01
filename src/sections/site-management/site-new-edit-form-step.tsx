@@ -110,6 +110,7 @@ export function StepOne() {
   const fetchPostcodeSuggestions = async () => {
     if (postcode.length > 3) {
       const { data } = await refetch();
+      console.log('data', data);
       if (data && data.suggestions && data.suggestions.length > 0) {
         setOptions(data.suggestions);
       }
@@ -272,7 +273,7 @@ const MeterDetails = ({ meter }: { meter: MeterDetails }) => {
             <Icon icon="mdi:numeric" style={{ marginRight: 8, color: 'text.secondary' }} />
             MPxN:{' '}
             <span style={{ textDecoration: 'underline dotted', marginLeft: 4 }}>
-              {' ' + meter.mpxn[0].mpxn}
+              {' ' + meter.mpxn.mpxn}
             </span>
           </Typography>
         </Grid>
@@ -305,10 +306,7 @@ type MeterDetails = {
   mpxn: {
     id: string;
     mpxn: string;
-    meterId: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }[];
+  }
   addressIdentifier: string;
   postCode: string;
 };

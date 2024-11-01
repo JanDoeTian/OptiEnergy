@@ -24,15 +24,9 @@ export function HomeView() {
 
   return (
     <>
-      <ScrollProgress
-        variant="linear"
-        progress={pageProgress.scrollYProgress}
-        sx={{ position: 'fixed' }}
-      />
 
       <BackToTop />
 
-      <HomeHero />
 
       <Stack sx={{ position: 'relative', bgcolor: 'background.default' }}>
         <HomeMinimal />

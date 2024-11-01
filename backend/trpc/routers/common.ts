@@ -161,11 +161,7 @@ export const commonRouter = router({
         // return existing meters
         const meters = await prisma.meter.findMany({
           where: {
-            mpxn: {
-              some: {
-                mpxn: mpxn,
-              },
-            },
+            mpxnId:existingMPXN.id,
           },
           include: {
             mpxn: true,
@@ -185,19 +181,25 @@ export const commonRouter = router({
       if (response.status === 200) {
         const meterData = await response.json();
 
+
+        const mpxnRecord = await prisma.mPXN.create({
+          data: {
+            mpxn: mpxn,
+          },
+        });
+
         const meter = await prisma.meter.create({
           data: {
             deviceId: meterData.deviceId,
             deviceManufacturer: meterData.deviceManufacturer,
-
+            mpxn: {
+              connect: {
+                id: mpxnRecord.id,
+              },
+            },
             deviceModel: meterData.deviceModel,
             deviceStatus: meterData.deviceStatus,
             deviceType: meterData.deviceType,
-            mpxn: {
-              create: {
-                mpxn: mpxn,
-              },
-            },
             addressIdentifier: meterData.propertyFilter.addressIdentifier,
             postCode: meterData.propertyFilter.postCode,
           },
